@@ -1,7 +1,6 @@
 import cohere
 import smtplib
 
-# Initialize the Cohere client with your API key
 co = cohere.Client('my_api_key')
 
 sender = 'my_email' 
@@ -18,12 +17,11 @@ def generate_email_content(recipient_name, product_name):
         response = co.generate(
             model='command-xlarge-nightly',
             prompt=prompt,
-            max_tokens=500  # Increase the max_tokens value to allow more space for content
+            max_tokens=500
         )
 
         email_body = response.generations[0].text.strip()
 
-        # Ensure the email ends correctly and remove any content after the closing
         closing = "Looking forward to hearing from you! Best regards, [Your Name]"
         if closing in email_body:
             email_body = email_body.split(closing)[0] + closing
@@ -56,7 +54,7 @@ def main():
     name = 'Alisher Aldamzharov'
     email = 'alish19083@gmail.com'
     product = 'Dark Chocolate with Blueberries'
-    subject = f"Special Offer for {product}"  # Updated subject
+    subject = f"Special Offer for {product}"
     email_content = generate_email_content(name, product)
     if email_content:
         send_email(email, subject, email_content)
