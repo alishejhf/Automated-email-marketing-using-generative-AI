@@ -1,5 +1,6 @@
 import cohere
 import smtplib
+import csv
 
 co = cohere.Client('my_api_key')
 
@@ -22,7 +23,7 @@ def generate_email_content(recipient_name, product_name):
 
         email_body = response.generations[0].text.strip()
 
-        closing = "Looking forward to hearing from you! Best regards, [Your Name]"
+        closing = "Looking forward to hearing from you! Best regards, Alisher Aldamzharov"
         if closing in email_body:
             email_body = email_body.split(closing)[0] + closing
 
@@ -30,6 +31,7 @@ def generate_email_content(recipient_name, product_name):
     except Exception as e:
         print(f"Error generating email content for {recipient_name}: {e}")
         return ""
+
 
 def send_email(recipient_email, subject, body):
     message = f"""From: {sender}
@@ -50,15 +52,28 @@ Subject: {subject}
     finally:
         server.quit()
 
+
+def load_recipients(file_path):
+    recipients = []
+    with open(file_path, mode='r', newline='', encoding='utf-8') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            recipients.append(row)
+    return recipients
+
+
 def main():
-    name = 'Alisher Aldamzharov'
-    email = 'alish19083@gmail.com'
-    product = 'Dark Chocolate with Blueberries'
-    subject = f"Special Offer for {product}"
-    email_content = generate_email_content(name, product)
-    if email_content:
-        send_email(email, subject, email_content)
-    else:
-        print(f"Skipping email to {name} due to content generation failure.")
+    recipients = load_recipients('recipients.csv')
+    for recipient in recipients:
+        name = recipient.get('Name')
+        email = recipient.get('Email')
+        product = recipient.get('Product')
+
+        email_content = generate_email_content(name, product)
+
+        if email_content:
+            send_email(email, f"Special Offer for {product}", email_content)
+        else:
+            print(f"Skipping email to {name} due to content generation failure.")
 
 main()
